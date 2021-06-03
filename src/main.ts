@@ -3,9 +3,10 @@ import { loadFile } from './file-loader'
 import { simulate } from './simulate'
 import { ExcelSheet } from './types'
 
-const messageInterval = 1000
+const messageInterval = 5000
 const spawnerTimeout = 3500
-const allowedSheets = ['bin-008']
+// const allowedSheets = ['bin-006']
+const allowedSheets = []
 
 const spawnSimulator = (sheet: ExcelSheet, timeout: number, interval: number) => {
 	setTimeout(() => simulate(sheet, interval), timeout)

@@ -6,19 +6,29 @@ export const simulate = (sheet: ExcelSheet, interval: number) => {
 	const connectionStr = sheet.data.shift()[0].trim()
 	const client = Client.fromConnectionString(connectionStr, Mqtt);
 
-	console.log(`Simulation for "${sheet.name}" started.`)
+	console.log(`Spawned simulator for "${sheet.name}".`)
 
 	let rowIndex = 0
 	let finalIndex = sheet.data.length
+	let finish = false
 
 	let intervalRef = setInterval(() => {
-		const messageStr = sheet.name + ';' + sheet.data[rowIndex].join(';')
-		const message = new Message(messageStr)
-		console.log('  -> ', messageStr)
+		const messageObj = {
+			binId: sheet.name,
+			fullness: sheet.data[rowIndex][0],
+			smoke: sheet.data[rowIndex][1],
+			tilt: sheet.data[rowIndex][2],
+		}
+		const message = new Message(JSON.stringify(messageObj))
 
 		client.sendEvent(message, err => {
 			if (err) {
-				console.error('  -> Error: ' + err.toString())
+				console.error('  ->  Error: ' + err.toString())
+			} else {
+				console.log('  -> ', messageObj)
+				if (finish) {
+					setTimeout(() => console.log(`Simulation for "${sheet.name}" was terminated.`), 0)
+				}
 			}
 		})
 
@@ -26,7 +36,7 @@ export const simulate = (sheet: ExcelSheet, interval: number) => {
 		if (rowIndex === finalIndex || !sheet.data[rowIndex].length) {
 			clearInterval(intervalRef)
 			intervalRef = null
-			console.log(`Simulation for "${sheet.name}" finished.`)
+			finish = true
 		}
 	}, interval)
 
